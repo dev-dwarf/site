@@ -40,7 +40,7 @@ Block* parse_md(Arena *a, str input) {
   Block *first = Arena_struct_zero(a, Block);
   Block *b = first;
 
-  s32 code_block_number = 0;
+  s32 code_block = 0;
   while (input.len > 0) {
     str raw = str_cut_char(&input, '\n');
     str line = str_skip_whitespace(raw);
@@ -49,7 +49,7 @@ Block* parse_md(Arena *a, str input) {
       if (b->type != CODE) {
         b = push_block(a, b, CODE, 0);
         b->id = str_trim_whitespace(str_skip(line, 3));
-        b->num = code_block_number++;
+        b->num = code_block++;
       } else {
         b = push_block(a, b, NONE, 0);
       }
@@ -290,8 +290,99 @@ str render_html(Buf *out, Block *first) {
     render_wrap(out, b, WRAP(UN_LIST, "<ul>\n", "</ul>\n", "<li>", "</li>\n"));
     render_wrap(out, b, WRAP(RULE, "<hr>\n", "", "", ""));
 
+    if (b->type == HEADING) {
+      u8 n = '0' + b->num;
+      append_strl(out, "<h");
+      append(out, &n, 1);
+      append_strl(out, " id='");
+      append_str(out, b->id);
+      append_strl(out, "'>");
 
+      render_inline(out, b->text);
 
+      append_strl(out, "</h");
+      append(out, &n, 1);
+      append_strl(out, ">");
+    }
+
+    if (b->type == CODE) {
+      char id[8];
+      if (b->id.len == 0) {
+        b->id.len = snprintf(id, sizeof(id), "code%03d", b->num);
+        b->id.str = id;
+      }
+      append_strl(out, "<code id='");
+      append_str(out, b->id);
+      append_strl(out, "'><pre>\n");
+      s32 line = 1;
+      bool in_comment = 0;
+      #define COMMENT_SPAN "<span style='color: var(--comment);'>"
+      for (Text *t = b->text; t; t = t->next, line++) {
+        char id[32]; 
+        s32 id_len = snprintf(id, sizeof(id), "%.*s-%d", (s32)b->id.len, b->id.str, line);
+        append_strl(out, "<span id='"); 
+        append(out, id, id_len);
+        append_strl(out, "'><a href='#"); 
+        append(out, id, id_len);
+        append_strl(out, "' aria-hidden='true'></a>"); 
+
+        if (in_comment == 2) {
+          append_strl(out, COMMENT_SPAN);
+        }
+
+        char in_string = 0;
+        str s = t->s;
+        s32 i = 0;
+        while (s.len > 0) {
+          while (i < s.len && (char_is_whitespace(s.str[i]) || char_is_alphanum(s.str[i]))) {
+            i++;
+          }
+          append(out, s.str, i);
+          s = str_skip(s, i);
+          i = 0;
+          if (str_has_prefix(s, strl("//"))) {
+            in_comment = 1;
+            append_strl(out, COMMENT_SPAN);
+            i = 2;
+          } else if (str_has_prefix(s, strl("/*"))) {
+            in_comment = 2;
+            append_strl(out, COMMENT_SPAN);
+            i = 2;
+          } else if (in_comment == 2 && str_has_prefix(s, strl("*/"))) {
+            in_comment = 0;
+            i = 2;
+          } else if (s.str[0] == '<') {
+            append_strl(out, "&lt;");
+            s = str_skip(s, 1);
+          } else if (s.str[0] == '>') {
+            append_strl(out, "&gt;");
+            s = str_skip(s, 1);
+          } else if (s.str[0] == '&') {
+            append_strl(out, "&amp;");
+            s = str_skip(s, 1);
+          } else if (s.str[0] == '\'' || s.str[0] == '"') {
+            if (in_comment == 0) {
+              if (in_string == 0)  {
+                append_strl(out, "<span style='color: var(--red);'>");
+              } else if (in_string == s.str[0]) {
+                append_strl(out, "</span>");
+              }
+            }
+            i = 1;
+          } else {
+            i = 1;
+          }
+        }
+
+        if (in_comment > 0) {
+          if (in_comment == 1) in_comment = 0;
+          append_strl(out, "</span>");
+        }
+        append_strl(out, "</span>\n");
+
+      }
+      append_strl(out, "</pre></code>\n");
+    }
   }
 
   return (str){ out->buf, out->len };
