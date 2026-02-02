@@ -51,18 +51,18 @@ Block* parse_md(Arena *a, str input) {
         b->id = str_trim_whitespace(str_skip(line, 3));
         b->num = code_block++;
       } else {
-        b = push_block(a, b, NONE, 0);
+        b = push_block(a, b, 0, 0);
       }
 
     } else if (b->type == CODE) {
       b = push_block(a, b, CODE, &raw);
 
     } else if (line.len == 0) {
-      b = push_block(a, b, NONE, 0);
+      b = push_block(a, b, 0, 0);
 
     } else if (str_has_prefix(line, strl("@{"))) {
       line = str_skip(line, 2);
-      b = push_block(a, b, NONE, 0);
+      b = push_block(a, b, 0, 0);
       b->id = str_cut_delims(&line, strl(",}"));
       b = push_block(a, b, SPECIAL, &line);
     } else if (str_has_prefix(line, strl("---"))) {
@@ -93,7 +93,7 @@ Block* parse_md(Arena *a, str input) {
       b = push_block(a, b, QUOTE, &line);
 
     } else if (line.str[0] == '#') {
-      b = push_block(a, b, NONE, 0);
+      b = push_block(a, b, 0, 0);
       while (line.str[b->num] == '#') {
         b->num++;
       }
@@ -169,17 +169,13 @@ str parse_inline(Arena *a, Text *p) {
     }
   }
 
-  // TODO(lf): wrapping is still a bit off
-  // instead of having inline continuations be in next
-  // should ASSERT that all s are fully parsed 
   p->s = str_first(p->s, (s.str - p->s.str) - tok_len);
 
-  ASSERT(!(stop == NONE && s.len != 0), "NONE text must be fully parsed");
   return s;
 }
 
 Block* push_block(Arena *a, Block *b, enum BlockType type, str *line) {
-  if (b->type != type && b->type != NONE) {
+  if (b->type != type && b->type) {
     b = (b->next = Arena_struct_zero(a, Block));
   }
   b->type = type;
@@ -290,6 +286,13 @@ str render_html(Buf *out, Block *first) {
     render_wrap(out, b, WRAP(UN_LIST, "<ul>\n", "</ul>\n", "<li>", "</li>\n"));
     render_wrap(out, b, WRAP(RULE, "<hr>\n", "", "", ""));
 
+    if (b->type == TABLE) {
+      append_strl(out, "<table class=");
+      append_str(out, b->id);
+      append_strl(out, ">\n");
+      render_wrap(out, b, WRAP(TABLE, "", "</table>\n", "<tr>", "</tr>\n"));
+    }
+
     if (b->type == HEADING) {
       u8 n = '0' + b->num;
       append_strl(out, "<h");
@@ -309,21 +312,21 @@ str render_html(Buf *out, Block *first) {
       char id[8];
       if (b->id.len == 0) {
         b->id.len = snprintf(id, sizeof(id), "code%03d", b->num);
-        b->id.str = id;
+        b->id.str = (u8*) id;
       }
       append_strl(out, "<code id='");
       append_str(out, b->id);
       append_strl(out, "'><pre>\n");
       s32 line = 1;
-      bool in_comment = 0;
+      s32 in_comment = 0;
       #define COMMENT_SPAN "<span style='color: var(--comment);'>"
       for (Text *t = b->text; t; t = t->next, line++) {
         char id[32]; 
         s32 id_len = snprintf(id, sizeof(id), "%.*s-%d", (s32)b->id.len, b->id.str, line);
         append_strl(out, "<span id='"); 
-        append(out, id, id_len);
+        append(out, (u8*) id, id_len);
         append_strl(out, "'><a href='#"); 
-        append(out, id, id_len);
+        append(out, (u8*) id, id_len);
         append_strl(out, "' aria-hidden='true'></a>"); 
 
         if (in_comment == 2) {
@@ -389,9 +392,10 @@ str render_html(Buf *out, Block *first) {
 }
 
 #include <stdio.h>
-#include <fcntl.h>     // open(), O_RDONLY
-#include <unistd.h>    // read(), close(), ssize_t (sometimes needed)
-#include <sys/stat.h>  // struct stat, fstat()
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <dirent.h>
 
 str read_file(Arena *a, const char *path) {
   str out; 
@@ -405,16 +409,37 @@ str read_file(Arena *a, const char *path) {
   return out;
 }
 
-
 int main(int argc, char *argv[]) {
+  UNUSED(argc);
+  UNUSED(argv);
   Arena a = Arena_new((Arena){ .size = MB(32) });
-  str test = read_file(&a, argv[1]);
-  Block *first = parse_md(&a, test);
+
+  str header = read_file(&a, "header.html");
+  str footer = read_file(&a, "footer.html");
+  // str rss_header = read_file(&a, "rss-header.xml");
 
   Buf out = {0};
   out.cap = MB(2);
   out.buf = Arena_take(&a, out.cap);
 
-  str html = render_html(&out, first);
-  printf(" %.*s\n", (int) html.len, html.str);
+  chdir("pages/");
+  DIR *dir = opendir(".");
+  for (struct dirent* f; (f = readdir(dir)); out.len = 0) 
+    ARENA_TEMP(a) {
+    if (f->d_type != DT_REG) continue;
+    str name = strc(f->d_name);
+    str md = read_file(&a, f->d_name);
+    Block *first = parse_md(&a, md);
+
+    // append_str(&out, header);
+    render_html(&out, first);
+    // append_str(&out, footer);
+
+    printf("\n\n%.*s\n", (s32) name.len, (char*) name.str);
+    printf("%.*s\n", (s32) out.len, (char*) out.buf);
+  }
+  closedir(dir);
+
+  return 0;
 }
+
