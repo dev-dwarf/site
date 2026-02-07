@@ -203,7 +203,6 @@ Block* push_block(Arena *a, Block *b, enum BlockType type, str *line) {
     next->s = *line;
 
     if (b->type != CODE) {
-      // TODO ugly that I am wrapping more here
       parse_inline(a, next);
     }
   }
@@ -239,7 +238,6 @@ void render_inline(Buf *out, Text *t) {
   [STRUCK] = strl("<s>"),
   [CODE_INLINE] = strl("<code>"),
   [TABLE_CELL] = strl("<td>"),
-  // LINK, IMAGE, EXPLAIN, // not covered TODO handle special cases
   };
   for (; t; t = t->next) {
     str s = t->s;
