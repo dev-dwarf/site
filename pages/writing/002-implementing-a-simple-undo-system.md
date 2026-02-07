@@ -1,7 +1,6 @@
-@{article}
-@{title, Implementing A Simple Undo System, 08 Jan 2024}
-@{desc, Details about a nice undo system I implemented recently. }
-@{sections}
+title: Implementing A Simple Undo System
+date: Mon, 08 Jan 2024 1:00:00 MST
+desc: Details about a nice undo system I implemented recently.
 ---
 ##intro Introduction
 Recently I've been implementing a level editor for my game engine, and I'd been dreading adding

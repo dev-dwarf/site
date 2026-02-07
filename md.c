@@ -437,6 +437,22 @@ str read_file(Arena *a, const char *path) {
   return out;
 }
 
+bool write_file(const char *path, u8* data, s64 len) {
+  int fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+
+  s64 n = 0;
+  while (n < len) {
+    s64 i = write(fd, data + n, len - n);
+    if (i > 0) {
+      n += i;
+    } else {
+      break;
+    }
+  }
+  close(fd);
+  return n != len;
+}
+
 str header;
 str footer;
 
@@ -475,16 +491,78 @@ int main(int argc, char *argv[]) {
   append_str(&rss, rss_header);
 
   chdir("pages/writing");
-  {
+  ARENA_TEMP(a) {
     DIR *dir = opendir(".");
-    for (struct dirent* f; (f = readdir(dir)); out.len = 0) 
-      ARENA_TEMP(a) {
+    str *article = Arena_array(&a, str, 4096);
+    s32 articles = 0;
+    for (struct dirent* f; (f = readdir(dir)); ) {
       if (f->d_type != DT_REG) continue;
-      
-      str name = strc(f->d_name);
-      str md = read_file(&a, f->d_name);
+      s32 i = 0;
+      for (; i < articles; i++) {
+        if (memcmp(article[i].str, f->d_name, 3) <= 0) {
+          break;
+        }
+      }
+      for (s32 j = articles; j > i; j--) {
+        article[j] = article[j-1];
+      }
+      article[i] = str_copy(&a, strc(f->d_name));
+      articles++;
+    }
+
+    for (s32 i = 0; i < articles; i++) ARENA_TEMP(a) {
+      out.len = 0;
+      str md = read_file(&a, str_cstring(&a, article[i]));
+      str name = str_cut(str_skip(article[i], 4), 3);
+
+      str frontmatter = str_cut_sub(&md, strl("---"));
+      str title = str_skip_prefix(str_cut_char(&frontmatter, '\n'), strl("title: "));
+      str date = str_skip_prefix(str_cut_char(&frontmatter, '\n'), strl("date: "));
+      str desc = str_skip_prefix(str_cut_char(&frontmatter, '\n'), strl("desc: "));
+      append_strl(&rss, "<item>\n<title>");
+      append_str(&rss, title);
+      append_strl(&rss, "</title>\n<description>");
+      append_str(&rss, desc);
+      append_strl(&rss, "</description>\n<link>https://loganforman.com/writing/");
+      append_str(&rss, name);
+      append_strl(&rss, ".html</link>\n<guid>https://loganforman.com/writing/");
+      append_str(&rss, name);
+      append_strl(&rss, ".html</guid>\n<pubDate>");
+      append_str(&rss, date);
+      append_strl(&rss, "</pubDate>\n</item>\n");
+
+      append_strl(&out, "<div style='clear: both'>\n<h1>");
+      append_str(&out, title);
+      append_strl(&out, "</h1>\n<h3>");
+      append_str(&out, str_first(date, 16));
+      append_strl(&out, "</h3>\n</div>\n");
+
       Block *first = parse_md(&a, md);
-      make_page(first);
+
+      s32 toc_level = 0; s32 toc_first = 0;
+      append_strl(&out, "<ul class='sections'>\n");
+      for (Block *b = first; b; b = b->next) {
+        if (b->type == HEADING) {
+          if (toc_first == 0) {
+            toc_level = toc_first = b->num;
+          }
+
+          for (; toc_level < b->num; toc_level++)
+            append_strl(&out, "<ul class='sections'>\n");
+          for (; toc_level > b->num; toc_level--)
+            append_strl(&out, "</ul>\n");
+
+          append_strl(&out, "<li><a href='#");
+          append_str(&out, b->id);
+          append_strl(&out, "'>");
+          render_inline(&out, b->text);
+          append_strl(&out, "</a></li>\n");
+        }
+      }
+      for (; toc_level >= toc_first; toc_level--)
+        append_strl(&out, "</ul>\n");
+
+      // make_page(first);
 
       printf("\n\n%.*s\n", (s32) name.len, (char*) name.str);
       printf("%.*s\n", (s32) out.len, (char*) out.buf);
@@ -492,23 +570,27 @@ int main(int argc, char *argv[]) {
     closedir(dir);
   }
 
-  chdir("..");
-  {
-    DIR *dir = opendir(".");
-    for (struct dirent* f; (f = readdir(dir)); out.len = 0) 
-      ARENA_TEMP(a) {
-      if (f->d_type != DT_REG) continue;
+  append_strl(&rss, "</channel>\n</rss>\n");
 
-      str name = strc(f->d_name);
-      str md = read_file(&a, f->d_name);
-      Block *first = parse_md(&a, md);
-      make_page(first);
+  write_file("../../docs/rss.xml", rss.buf, rss.len);
 
-      printf("\n\n%.*s\n", (s32) name.len, (char*) name.str);
-      printf("%.*s\n", (s32) out.len, (char*) out.buf);
-    }
-    closedir(dir);
-  }
+  // chdir("..");
+  // {
+  //   DIR *dir = opendir(".");
+  //   for (struct dirent* f; (f = readdir(dir)); out.len = 0) 
+  //     ARENA_TEMP(a) {
+  //     if (f->d_type != DT_REG) continue;
+
+  //     str name = strc(f->d_name);
+  //     str md = read_file(&a, f->d_name);
+  //     Block *first = parse_md(&a, md);
+  //     make_page(first);
+
+  //     printf("\n\n%.*s\n", (s32) name.len, (char*) name.str);
+  //     printf("%.*s\n", (s32) out.len, (char*) out.buf);
+  //   }
+  //   closedir(dir);
+  // }
 
   return 0;
 }

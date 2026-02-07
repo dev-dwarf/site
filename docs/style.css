@@ -1,0 +1,368 @@
+
+/* colors */
+:root {
+    --purple:   #230C45;
+    --red:      #FF0059;
+    --white:    #FFFFF7;
+    --yellow:   #ffcf00;
+    --black:    #030A0D;
+    --green:    #004d57;
+    --blue:     #2CE8F5;
+    --grey:     #797366;
+    --bone:     #EFEFE0;
+    --dblue:    #192669;
+}
+@font-face {
+    font-family: 'Text';
+    src: url('/assets/Inter-V.ttf');
+}
+@font-face {
+    font-family: 'Code';
+    src: url('/assets/BerkeleyMono.woff');
+}
+
+::-moz-selection { /* Code for Firefox */
+    color: var(--black);
+    background:  var(--blue);
+}
+
+::selection {
+    color: var(--black);
+    background:  var(--blue);
+}
+
+body {
+    --bg: var(--white);
+    --text: var(--black);
+    --link: var(--blue);
+    --deep: var(--purple);
+    --low: var(--bone);
+    --high: var(--yellow);
+    --comment: var(--green);
+}
+
+body[data-theme="night"] {
+    --bg: #000;
+    --text: var(--bone);
+    --link: var(--green);
+    --deep: var(--black);
+    --low: var(--dblue);
+    --high: var(--dblue);
+    --comment: var(--grey);
+}
+
+.articles ul {
+    /* remove bullet points */
+    list-style: none;
+}
+
+img {
+    max-width: 100%;
+    display: block;
+    margin: auto;
+}
+
+video {
+    max-width: 100%;
+    display: block;
+    margin: auto;
+}
+
+body {
+    color: var(--text);
+    background-color: var(--bg);
+    font-family: "Text", sans-serif;
+    font-size: 14px;
+    font-stretch: 80%;
+    line-height: 1.1rem;
+    overflow-wrap: break-word;
+    max-width: 850px;
+    margin: auto;
+}
+
+p {
+    text-align: justify;
+    hyphens: manual;
+}
+
+.project img {
+    width: 100%;
+    border: 2px solid var(--text);
+    /* border-radius: 2px; */
+    float: right;
+}
+
+.projtable img {
+    margin-left: 4px;
+    margin-right: 4px;
+    width: 64px;
+    height: 64px;
+    max-width: 64px;
+}
+
+.projtable td:nth-child(odd) {
+    width: 72px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    width:100%;
+    line-height: 2.0rem;
+    font-family: "Code", mono;
+    color: var(--text);
+    text-decoration: underline 2px;
+    text-underline-offset: 0.25rem;
+    text-decoration-color: var(--high);
+}
+
+li {
+    padding: 5px ;
+}
+
+blockquote {
+    border-left: 2px solid var(--low);
+    margin: 1rem 1rem;
+    padding: 1rem 1rem;
+    padding-right: 2rem;
+}
+
+pre {
+    margin: 1rem 0em;
+    padding: 0rem 0rem;
+    white-space: preserve nowrap;
+    font-family: 'Code', monospace;
+    font-size: 12px;
+    line-height: 1.0rem;
+    word-wrap: break-word;
+    counter-reset: source-line 0;
+    overflow: auto;
+}
+code {
+    font-family: 'Code', monospace;
+    font-size: 12px;
+    word-wrap: break-word;       
+}
+pre > span {
+    line-height: 1.25;
+    position: relative;
+    counter-increment: source-line;
+}
+pre > span > a:first-child::before {
+    font-weight: bold;
+    color: var(--high);
+    background-color: var(--bg);
+    position: relative;
+    text-align: right;
+    display: inline-block;
+    width: 3rem;
+    vertical-align: baseline;
+    padding-right: 0.5rem;
+    content: counter(source-line);
+}
+pre > span > a:first-child:hover::before {
+    color: var(--blue) !important;
+}
+
+abbr {
+    text-decoration: underline 0.1rem;
+    text-decoration-color: var(--bone) !important;
+}
+
+/* links */
+a {
+    color: var(--text);
+    text-align: center;
+    text-decoration-line: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: .2rem;
+    text-decoration-color: var(--link) !important;
+}
+a:hover {
+    background-color: var(--link) !important;
+}
+a:visited {
+    text-decoration-color: var(--high) !important;
+}
+h1 a {
+    text-decoration: none;
+}
+.sections a {
+    color: var(--text) !important;
+    text-decoration-color: var(--high) !important;
+}
+.sections a:hover {
+    background-color: var(--high) !important;
+}
+.sections a:visited {
+    text-decoration-style: solid;
+}
+td > a {
+    text-underline-offset: .25rem;
+}
+
+
+
+/* tables */
+table {
+    width: 100%;
+    table-layout: auto;
+    border-spacing: 0;
+    border-collapse:  collapse;
+    text-align: left;
+    box-shadow: 2px 2px var(--deep);
+}
+
+tr {
+    border: solid 1px var(--low);
+}
+
+
+td {
+    padding: 0.15rem 0.15rem;
+    border-right: solid 1px var(--low);
+    position: relative;
+}
+
+tr:nth-of-type(1) {
+    width: 100%;
+    background: var(--low);
+    font-weight: bold;
+    font-family: "Code", monospace;
+}
+
+th {
+    padding: 0.15rem 0.15rem;
+}
+
+tr:nth-of-type(1) td {
+    border: none;
+}
+
+/* rules */
+hr {
+    margin-left: auto;
+  margin-right: auto;
+  padding-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  border: none;
+  border-bottom: 2px solid;
+  height: 1px;
+  color: var(--text);
+}
+
+body[data-theme="night"] hr {
+    color: var(--high);
+}
+
+/* nav bar sections */
+nav {
+    font-family: "Code", mono;
+    display: block;
+    width: 100%;
+    padding-bottom: 0.5rem;
+}
+
+details {
+    border-left: 0.5rem solid var(--low);
+    margin: 0rem 0.5rem;
+    padding: 0.5rem 0.5rem;
+}
+
+details summary {
+    cursor: pointer;
+}
+
+summary > * {
+    display: inline !important;
+}
+
+/* misc */
+.w100 {
+    width: 100%;
+}
+.w50 {
+    width: 47%;
+}
+.w25 {
+    width: 22.5%;
+}
+.w66 {
+    width: 64%;
+}
+.w33 {
+    width: 31%;
+}
+
+.centered {
+    margin: auto;
+}
+
+.centert {
+    text-align: center;
+}
+
+.bg-deep {
+    background-color: var(--deep);
+}
+.bg-low {
+    color: var(--low);
+}
+.left {
+    float:left;
+}
+.right {
+    float:right;
+}
+.space-after {
+    clear: both;
+}
+
+body .light { display: none;}
+body .night { display: block;  text-decoration-color: var(--red) !important; }
+body[data-theme="night"] .light { display: block; text-decoration-color: var(--red) !important;}
+body[data-theme="night"] .night { display: none; }
+
+/* mobile overrides */
+@media only screen and (max-width: 850px) {
+    .project-text {
+        width: 100%;
+    }
+
+    .project-image {
+        width: 100%
+    }
+
+    .project img {
+        float: left;
+        width: 100%;
+    }   
+ 
+    .w100 {
+        width: 100%;
+    }
+    .w50 {
+        width: 100%;
+    }
+    .w25 {
+        width: 100%;
+    }
+    .w66 {
+        width: 100%;
+    }
+    .w33 {
+        width: 100%;
+    }
+
+    .left {
+        float:none;
+        margin-bottom: 1rem;
+    }
+    .right {
+        float:none;
+        margin-bottom: 1rem;
+    }
+
+    pre {
+        font-size: 10px; 
+        margin: 1rem 0px;
+    }
+}

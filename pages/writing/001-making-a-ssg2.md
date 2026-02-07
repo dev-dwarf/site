@@ -1,7 +1,6 @@
-@{article}
-@{title, Upgrading A Static Site Generator, Thu, 09 Jun 2023}
-@{desc, It's been a while! See how I've upgraded the site with the 'special' node.}
-@{sections}
+title: Upgrading A Static Site Generator
+date: Thu, 09 Jun 2023 1:00:00 MST
+desc: See how I've upgraded the SSG with the 'special' node.
 ---
 ##introd Introduction
 It's been a while since my first post, but I'm hoping to actually use this blog now that I've graduated and have a bit more time. I think a good way to continue would be walking through more of my site generator. When I left off @(/writing/making-a-ssg1.html last time), the main thing missing from my site was a way to handle special elements, like an index for articles on the @(/writing.html writing page).
