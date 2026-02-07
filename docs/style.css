@@ -161,6 +161,14 @@ pre > span > a:first-child::before {
 pre > span > a:first-child:hover::before {
     color: var(--blue) !important;
 }
+.code-comment {
+    color: var(--comment);
+    font-weight: bold;
+}
+.code-string {
+    color: var(--red);
+    font-weight: bold;
+}
 
 abbr {
     text-decoration: underline 0.1rem;

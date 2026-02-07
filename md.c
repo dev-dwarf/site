@@ -81,7 +81,9 @@ Block* parse_md(Arena *a, str input) {
       line = str_skip(line, 2);
 
       if (b->type != TABLE) {
-        str id = str_cut_char(&line, '|');
+        s64 loc = str_find_char(line, '|');
+        str id = str_first(line, loc);
+        line = str_skip(line, loc);
         b = push_block(a, b, TABLE, &line);
         b->id = id;
       } else {
@@ -176,7 +178,8 @@ str parse_inline(Arena *a, Text *p) {
     }
   }
 
-  p->s = str_first(p->s, (s.str - p->s.str) - tok_len);
+  p->s = str_first(p->s, MAX(0, (s.str - p->s.str) - tok_len));
+  ASSERT(p->s.len >= 0, "Invalid length %d!", (s32) p->s.len);
 
   return s;
 }
@@ -221,7 +224,7 @@ struct Buf {
 };
 void append(Buf *b, u8 *data, s32 len) {
   s32 avail = b->cap - b->len;
-  s32 amount = b->err? 0 : MIN(avail, len);
+  s32 amount = b->err? 0 : CLAMP(len, 0, avail);
   for (s32 i = 0; i < amount; i++) {
     b->buf[b->len+i] = data[i];
   }
@@ -316,9 +319,9 @@ str append_html(Buf *out, Block *b) {
   render_wrap(out, b, WRAP(RULE, "<hr>\n", "", "", ""));
 
   if (b->type == TABLE) {
-    append_strl(out, "<table class=");
+    append_strl(out, "<table class='");
     append_str(out, b->id);
-    append_strl(out, ">\n");
+    append_strl(out, "'>\n");
     render_wrap(out, b, WRAP(TABLE, "", "</table>\n", "<tr>", "</tr>\n"));
   }
 
@@ -348,7 +351,7 @@ str append_html(Buf *out, Block *b) {
     append_strl(out, "'><pre>\n");
     s32 line = 1;
     s32 in_comment = 0;
-    #define COMMENT_SPAN "<span style='color: var(--comment);'>"
+    #define COMMENT_SPAN "<span class='code-comment'>"
     for (Text *t = b->text; t; t = t->next, line++) {
       char id[32]; 
       s32 id_len = snprintf(id, sizeof(id), "%.*s-%d", (s32)b->id.len, b->id.str, line);
@@ -362,7 +365,7 @@ str append_html(Buf *out, Block *b) {
         append_strl(out, COMMENT_SPAN);
       }
 
-      char in_string = 0;
+      u8 in_string = 0;
       str s = t->s;
       s32 i = 0;
       while (s.len > 0) {
@@ -381,8 +384,9 @@ str append_html(Buf *out, Block *b) {
           append_strl(out, COMMENT_SPAN);
           i = 2;
         } else if (in_comment == 2 && str_has_prefix(s, strl("*/"))) {
+          append_strl(out, "*/</span>");
           in_comment = 0;
-          i = 2;
+          s = str_skip(s, 2);
         } else if (s.str[0] == '<') {
           append_strl(out, "&lt;");
           s = str_skip(s, 1);
@@ -393,14 +397,19 @@ str append_html(Buf *out, Block *b) {
           append_strl(out, "&amp;");
           s = str_skip(s, 1);
         } else if (s.str[0] == '\'' || s.str[0] == '"') {
+          i = 1;
           if (in_comment == 0) {
             if (in_string == 0)  {
-              append_strl(out, "<span style='color: var(--red);'>");
+              append_strl(out, "<span class='code-string'>");
+              in_string = s.str[0];
             } else if (in_string == s.str[0]) {
+              append(out, &in_string, 1);
               append_strl(out, "</span>");
+              in_string = 0;
+              s = str_skip(s, 1);
+              i = 0;
             }
           }
-          i = 1;
         } else {
           i = 1;
         }
@@ -438,7 +447,7 @@ str read_file(Arena *a, const char *path) {
 }
 
 bool write_file(const char *path, u8* data, s64 len) {
-  int fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+  int fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0666);
 
   s64 n = 0;
   while (n < len) {
@@ -461,7 +470,6 @@ Buf out;
 Buf rss;
 
 void make_page(Block *first) {
-  // append_str(&out, header);
   for (Block *b = first; b; b = b->next) {
     if (b->type == SPECIAL) {
 
@@ -469,8 +477,6 @@ void make_page(Block *first) {
       append_html(&out, b);
     }
   }
-  // append_str(&out, footer);
-
 }
 
 
@@ -509,9 +515,12 @@ int main(int argc, char *argv[]) {
       article[i] = str_copy(&a, strc(f->d_name));
       articles++;
     }
+    closedir(dir);
 
     for (s32 i = 0; i < articles; i++) ARENA_TEMP(a) {
       out.len = 0;
+      append_str(&out, header);
+
       str md = read_file(&a, str_cstring(&a, article[i]));
       str name = str_cut(str_skip(article[i], 4), 3);
 
@@ -523,15 +532,17 @@ int main(int argc, char *argv[]) {
       append_str(&rss, title);
       append_strl(&rss, "</title>\n<description>");
       append_str(&rss, desc);
-      append_strl(&rss, "</description>\n<link>https://loganforman.com/writing/");
+      append_strl(&rss, "</description>\n<link>/writing/");
       append_str(&rss, name);
-      append_strl(&rss, ".html</link>\n<guid>https://loganforman.com/writing/");
+      append_strl(&rss, ".html</link>\n<guid>/writing/");
       append_str(&rss, name);
       append_strl(&rss, ".html</guid>\n<pubDate>");
       append_str(&rss, date);
       append_strl(&rss, "</pubDate>\n</item>\n");
 
-      append_strl(&out, "<div style='clear: both'>\n<h1>");
+      append_strl(&out, "<title> 0A ");
+      append_str(&out, title);
+      append_strl(&out, "</title>\n<div style='clear: both'>\n<h1>");
       append_str(&out, title);
       append_strl(&out, "</h1>\n<h3>");
       append_str(&out, str_first(date, 16));
@@ -562,35 +573,42 @@ int main(int argc, char *argv[]) {
       for (; toc_level >= toc_first; toc_level--)
         append_strl(&out, "</ul>\n");
 
-      // make_page(first);
-
-      printf("\n\n%.*s\n", (s32) name.len, (char*) name.str);
-      printf("%.*s\n", (s32) out.len, (char*) out.buf);
+      make_page(first);
+      append_str(&out, footer);
+      
+      char filename[256];
+      snprintf(filename, sizeof(filename), "../../docs/writing/%.*s.html", (s32)name.len, name.str);
+      ASSERT(!write_file(filename, out.buf, out.len), "ERR: failed to write %s!", filename);
     }
-    closedir(dir);
   }
 
   append_strl(&rss, "</channel>\n</rss>\n");
 
   write_file("../../docs/rss.xml", rss.buf, rss.len);
 
-  // chdir("..");
-  // {
-  //   DIR *dir = opendir(".");
-  //   for (struct dirent* f; (f = readdir(dir)); out.len = 0) 
-  //     ARENA_TEMP(a) {
-  //     if (f->d_type != DT_REG) continue;
+  chdir("..");
+  {
+    DIR *dir = opendir(".");
+    for (struct dirent* f; (f = readdir(dir)); out.len = 0) 
+      ARENA_TEMP(a) {
+      if (f->d_type != DT_REG) continue;
+      str md = read_file(&a, f->d_name);
+      str name = str_cut(strc(f->d_name), 3);
+      Block *first = parse_md(&a, md);
 
-  //     str name = strc(f->d_name);
-  //     str md = read_file(&a, f->d_name);
-  //     Block *first = parse_md(&a, md);
-  //     make_page(first);
+      append_str(&out, header);
+      append_strl(&out, "<title> 0A ");
+      append_str(&out, name);
+      append_strl(&out, "</title>\n");
+      make_page(first);
+      append_str(&out, footer);
 
-  //     printf("\n\n%.*s\n", (s32) name.len, (char*) name.str);
-  //     printf("%.*s\n", (s32) out.len, (char*) out.buf);
-  //   }
-  //   closedir(dir);
-  // }
+      char filename[256];
+      snprintf(filename, sizeof(filename), "../docs/%.*s.html", (s32)name.len, name.str);
+      ASSERT(!write_file(filename, out.buf, out.len), "ERR: failed to write %s!", filename);
+    }
+    closedir(dir);
+  }
 
   return 0;
 }

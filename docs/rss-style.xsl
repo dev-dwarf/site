@@ -9,11 +9,20 @@
       <head>
         <meta charset="utf-8"/>
         <meta name="viewport" content="width=device-width, initial-scale=1"/>
-        <title><xsl:value-of select="/rss/channel/title"/> — Feed</title>
+        <title> 0A posts </title>
         <link rel="stylesheet" href="/style.css" type="text/css"/>
       </head>
       <body>
-
+        <script>
+        var theme = localStorage.getItem('theme') || 'light'
+        document.querySelector('body').setAttribute('data-theme', theme)
+        function toggleNight() {
+        console.log('toggle')
+        theme = (theme == 'light')? 'night' : 'light'
+        localStorage.setItem('theme', theme)
+        document.querySelector('body').setAttribute('data-theme', theme);  
+        }
+        </script>
         <main class='page-content' aria-label='Content'>
           <p>
           <div class="center"> <img src='/assets/dd.png' /> </div>
@@ -21,7 +30,6 @@
           <h2 id='center'>
            Logan Forman <a href='https://www.twitter.com/dev_dwarf'>@dev dwarf</a>
           </h2>
-
           <table>
             <tr>
               <th>Date</th>
@@ -37,6 +45,25 @@
             </xsl:for-each>
           </table>
         </main>
+        <nav>
+        <br />
+        <hr />
+        <table class='w33 left'><tr>
+          <td><a href='/index.html'>home</a></td>
+          <td><a href='/projects.html'>projects</a></td>
+          <td><a style='text-decoration-color: #EE802F !important' href='/rss.xml'>
+            posts</a></td>
+          <td class='light'><a class='light' onClick='toggleNight()'>light</a></td>
+          <td class='night'><a class='night' onClick='toggleNight()'>night</a></td>
+        </tr></table>
+        <table class='w33 right'><tr>
+          <td><a href='https://github.com/dev-dwarf'>github</a></td>
+          <td><a href='https://twitter.com/dev_dwarf'>twitter</a></td>
+          <td><a href='https://store.steampowered.com/developer/dd'>steam</a></td>
+          <td><a href='https://dev-dwarf.itch.io'>itch</a></td>
+        </tr></table>
+        <p><br/></p>
+      </nav>
       </body>
     </html>
   </xsl:template>

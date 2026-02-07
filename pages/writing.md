@@ -1,2 +1,2 @@
-##center Writing
-@{index, /writing/}
+<meta http-equiv="Refresh" content="0; url='/rss.xml'" />
+
