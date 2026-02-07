@@ -1,0 +1,2 @@
+##center Writing
+@{index, /writing/}
