@@ -78,6 +78,7 @@ body {
     overflow-wrap: break-word;
     max-width: 850px;
     margin: auto;
+    padding: 1em;
 }
 
 p {
