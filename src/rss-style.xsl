@@ -3,7 +3,7 @@
                 xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                 xmlns:atom="http://www.w3.org/2005/Atom"
                 >
-  <xsl:output method="html" encoding="utf-8" indent="yes"/>
+  <xsl:output method="html" encoding="utf-8" indent="yes" doctype-system="about:legacy-compat" />
   <xsl:template match="/">
 
   $
