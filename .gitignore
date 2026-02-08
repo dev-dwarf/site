@@ -1,4 +1,8 @@
 site
 *.html
-rss.xml
 result/
+
+# the template version of these is commited
+# dont want to commit the generated versions
+rss.xml
+rss-style.xsl
