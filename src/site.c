@@ -44,7 +44,7 @@ Block* parse_md(Arena *a, str input) {
     str raw = str_cut_char(&input, '\n');
     str line = str_skip_whitespace(raw);
 
-    if (str_has_prefix(line, strl("```"))) { // special case for code blocks
+    if (str_startl(line, "```")) { // special case for code blocks
       if (b->type != CODE) {
         b = push_block(a, b, CODE, 0);
         b->id = str_trim_whitespace(str_skip(line, 3));
@@ -59,10 +59,10 @@ Block* parse_md(Arena *a, str input) {
     } else if (line.len == 0) {
       b = push_block(a, b, 0, 0);
 
-    } else if (str_has_prefix(line, strl("---"))) {
+    } else if (str_startl(line, "---")) {
       b = push_block(a, b, RULE, 0);
 
-    } else if (str_has_prefix(line, strl("- "))) { 
+    } else if (str_startl(line, "- ")) { 
       // TODO(lf) UN_LIST and ORD_LIST dont support nested lists
       line = str_skip(line, 2);
       b = push_block(a, b, UN_LIST, &line);
@@ -71,7 +71,7 @@ Block* parse_md(Arena *a, str input) {
       line = str_skip(line, 3);
       b = push_block(a, b, ORD_LIST, &line);
 
-    } else if (str_has_prefix(line, strl("!|"))) {
+    } else if (str_startl(line, "!|")) {
       line = str_skip(line, 2);
 
       if (b->type != TABLE) {
@@ -84,7 +84,7 @@ Block* parse_md(Arena *a, str input) {
         b = push_block(a, b, TABLE, &line);
       }
 
-    } else if (str_has_prefix(line, strl("> "))) {
+    } else if (str_startl(line, "> ")) {
       line = str_skip(line, 2);
       b = push_block(a, b, QUOTE, &line);
 
@@ -251,7 +251,7 @@ void render_inline(Buf *out, Text *t) {
       append_str(out, s);
       append_strl(out, "</abbr>");
     } else if (t->type == IMAGE) {
-      if (str_has_suffix(s, strl(".mp4"))) {
+      if (str_endl(s, ".mp4")) {
         append_strl(out, "<video controls><source src='");
         append_str(out, s);
         append_strl(out, "' type='video/mp4'></video>");
@@ -369,15 +369,15 @@ str append_html(Buf *out, Block *b) {
         append(out, s.str, i);
         s = str_skip(s, i);
         i = 0;
-        if (str_has_prefix(s, strl("//"))) {
+        if (str_startl(s, "//")) {
           in_comment = 1;
           append_strl(out, COMMENT_SPAN);
           i = 2;
-        } else if (str_has_prefix(s, strl("/*"))) {
+        } else if (str_startl(s, "/*")) {
           in_comment = 2;
           append_strl(out, COMMENT_SPAN);
           i = 2;
-        } else if (in_comment == 2 && str_has_prefix(s, strl("*/"))) {
+        } else if (in_comment == 2 && str_startl(s, "*/")) {
           append_strl(out, "*/</span>");
           in_comment = 0;
           s = str_skip(s, 2);
@@ -501,12 +501,12 @@ int main(int argc, char *argv[]) {
       append_str(&out, header);
 
       str md = read_file(&a, str_cstring(&a, article[i]));
-      str name = str_cut(str_skip(article[i], 4), 3);
+      str name = str_trim(str_skip(article[i], 4), 3);
 
       str frontmatter = str_cut_sub(&md, strl("---"));
-      str title = str_skip_prefix(str_cut_char(&frontmatter, '\n'), strl("title: "));
-      str date = str_skip_prefix(str_cut_char(&frontmatter, '\n'), strl("date: "));
-      str desc = str_skip_prefix(str_cut_char(&frontmatter, '\n'), strl("desc: "));
+      str title = str_skip_startl(str_cut_char(&frontmatter, '\n'), "title: ");
+      str date = str_skip_startl(str_cut_char(&frontmatter, '\n'), "date: ");
+      str desc = str_skip_startl(str_cut_char(&frontmatter, '\n'), "desc: ");
       append_strl(&rss, "<item>\n<title>");
       append_str(&rss, title);
       append_strl(&rss, "</title>\n<description>");
@@ -585,7 +585,7 @@ int main(int argc, char *argv[]) {
       out.len = 0;
 
       str md = read_file(&a, f->d_name);
-      str name = str_cut(strc(f->d_name), 3);
+      str name = str_trim(strc(f->d_name), 3);
       Block *first = parse_md(&a, md);
 
       append_str(&out, header);
