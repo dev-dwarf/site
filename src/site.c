@@ -485,7 +485,7 @@ int main(int argc, char *argv[]) {
   rss.buf = Arena_take(&a, rss.cap);
   append_str(&rss, rss_header);
 
-  chdir("pages/writing");
+  ASSERT(chdir("pages/writing") == 0, "ERR: failed to chdir!");
   ARENA_TEMP(a) {
     DIR *dir = opendir(".");
     str *article = Arena_array(&a, str, 4096);
@@ -579,7 +579,7 @@ int main(int argc, char *argv[]) {
 
   write_file("../../docs/rss.xml", rss.buf, rss.len);
 
-  chdir("..");
+  ASSERT(chdir("..") == 0, "ERR: failed to chdir!");
   {
     DIR *dir = opendir(".");
     for (struct dirent* f; (f = readdir(dir)); out.len = 0) 
