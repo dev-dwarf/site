@@ -16,7 +16,6 @@
 !(/assets/dd.png)
 
 ---
-@{sections}
 #h1 H1
 h1
 ##h2 H2
@@ -28,9 +27,6 @@ h4
 #####h5 H5
 h5
 ---
-
-[ ###expand Expandable Note H3
-[ text of expandable note
 
 !|centered w33| Centered || Small || Table |
 !|| 1 || 2 || 3 |
