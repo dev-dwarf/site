@@ -27,6 +27,7 @@
           mkdir -p $out/docs/writing
           cp -r docs/ $out/
           cp -r pages/ $out/
+          cp src/*ml $out/
           cd $out && site
         '';
         installPhase = ''
