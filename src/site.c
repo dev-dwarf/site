@@ -22,7 +22,6 @@ enum BlockType {
   HEADING, RULE, CODE,
   TABLE,
   QUOTE, ORD_LIST, UN_LIST,
-  SPECIAL
 };
 
 typedef struct Block Block;
@@ -60,11 +59,6 @@ Block* parse_md(Arena *a, str input) {
     } else if (line.len == 0) {
       b = push_block(a, b, 0, 0);
 
-    } else if (str_has_prefix(line, strl("@{"))) {
-      line = str_skip(line, 2);
-      b = push_block(a, b, 0, 0);
-      b->id = str_cut_delims(&line, strl(",}"));
-      b = push_block(a, b, SPECIAL, &line);
     } else if (str_has_prefix(line, strl("---"))) {
       b = push_block(a, b, RULE, 0);
 
@@ -462,25 +456,21 @@ bool write_file(const char *path, u8* data, s64 len) {
   return n != len;
 }
 
-str header;
-str footer;
-
-Arena a;
-Buf out;
-Buf rss;
-
 int main(int argc, char *argv[]) {
   UNUSED(argc);
   UNUSED(argv);
-  a = Arena_new((Arena){ .size = MB(32) });
+  Arena a = Arena_new((Arena){ .size = MB(32) });
 
-  header = read_file(&a, "header.html");
-  footer = read_file(&a, "footer.html");
-  str rss_header = read_file(&a, "rss-header.xml");
+  str header = read_file(&a, "src/header.html");
+  str footer = read_file(&a, "src/footer.html");
+  str rss_header = read_file(&a, "src/rss-header.xml");
+  str rss_style = read_file(&a, "src/rss-style.xsl");
 
+  Buf out = {};
   out.cap = MB(2);
   out.buf = Arena_take(&a, out.cap);
 
+  Buf rss = {};
   rss.cap = MB(2);
   rss.buf = Arena_take(&a, rss.cap);
   append_str(&rss, rss_header);
@@ -578,6 +568,14 @@ int main(int argc, char *argv[]) {
   append_strl(&rss, "</channel>\n</rss>\n");
 
   write_file("../../docs/rss.xml", rss.buf, rss.len);
+
+  rss.len = 0;
+  append_str(&rss, str_cut_char(&rss_style, '$'));
+  append_str(&rss, header);
+  append_str(&rss, str_cut_char(&rss_style, '$'));
+  append_str(&rss, footer);
+  append_str(&rss, rss_style);
+  write_file("../../docs/rss-style.xsl", rss.buf, rss.len);
 
   ASSERT(chdir("..") == 0, "ERR: failed to chdir!");
   {
