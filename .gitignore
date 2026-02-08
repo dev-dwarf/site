@@ -1,3 +1,4 @@
 site
 *.html
 rss.xml
+result/
