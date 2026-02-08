@@ -44,7 +44,7 @@
               </tr>
             </xsl:for-each>
           </table>
-          <p>
+          <p class="centert">
           <em>This page is an rss feed. Copy the URL into your reader to subscribe. Learn more at <a href="https://aboutfeeds.com/">About Feeds</a>.</em>
           </p>
         </main>

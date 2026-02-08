@@ -469,17 +469,6 @@ Arena a;
 Buf out;
 Buf rss;
 
-void make_page(Block *first) {
-  for (Block *b = first; b; b = b->next) {
-    if (b->type == SPECIAL) {
-
-    } else {
-      append_html(&out, b);
-    }
-  }
-}
-
-
 int main(int argc, char *argv[]) {
   UNUSED(argc);
   UNUSED(argv);
@@ -573,7 +562,11 @@ int main(int argc, char *argv[]) {
       for (; toc_level >= toc_first; toc_level--)
         append_strl(&out, "</ul>\n");
 
-      make_page(first);
+      for (Block *b = first; b; b = b->next) {
+        append_html(&out, b);
+      }
+
+      append_strl(&out, "<hr><p class='centert'>Feel free to email me any comments about this article: <code>contact@loganforman.com</code></p>" );
       append_str(&out, footer);
       
       char filename[256];
@@ -600,7 +593,9 @@ int main(int argc, char *argv[]) {
       append_strl(&out, "<title> 0A ");
       append_str(&out, name);
       append_strl(&out, "</title>\n");
-      make_page(first);
+      for (Block *b = first; b; b = b->next) {
+        append_html(&out, b);
+      }
       append_str(&out, footer);
 
       char filename[256];
