@@ -498,6 +498,7 @@ int main(int argc, char *argv[]) {
 
     for (s32 i = 0; i < articles; i++) ARENA_TEMP(a) {
       out.len = 0;
+      append_strl(&out, "<!DOCTYPE html>\n");
       append_str(&out, header);
 
       str md = read_file(&a, str_cstring(&a, article[i]));
@@ -588,6 +589,7 @@ int main(int argc, char *argv[]) {
       str name = str_trim(strc(f->d_name), 3);
       Block *first = parse_md(&a, md);
 
+      append_strl(&out, "<!DOCTYPE html>\n");
       append_str(&out, header);
       append_strl(&out, "<title> 0A ");
       append_str(&out, name);
