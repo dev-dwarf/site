@@ -44,9 +44,11 @@
               </tr>
             </xsl:for-each>
           </table>
+          <p>
+          <em>This page is an rss feed. Copy the URL into your reader to subscribe. Learn more at <a href="https://aboutfeeds.com/">About Feeds</a>.</em>
+          </p>
         </main>
         <nav>
-        <br />
         <hr />
         <table class='w33 left'><tr>
           <td><a href='/index.html'>home</a></td>
