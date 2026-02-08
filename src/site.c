@@ -582,9 +582,10 @@ int main(int argc, char *argv[]) {
   ASSERT(chdir("..") == 0, "ERR: failed to chdir!");
   {
     DIR *dir = opendir(".");
-    for (struct dirent* f; (f = readdir(dir)); out.len = 0) 
-      ARENA_TEMP(a) {
+    for (struct dirent* f; (f = readdir(dir)); ) ARENA_TEMP(a) {
       if (f->d_type != DT_REG) continue;
+      out.len = 0;
+
       str md = read_file(&a, f->d_name);
       str name = str_cut(strc(f->d_name), 3);
       Block *first = parse_md(&a, md);
