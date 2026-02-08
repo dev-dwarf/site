@@ -1,5 +1,5 @@
 title: Making A Static Site Generator
-date: Sun, 18 Dec 2022 1:00:00 MST
+date: Sun, 18 Dec 2022 01:00:00 MST
 desc: First post! A brief walkthrough of how I made the SSG for my personal website.
 ---
 ##introd Introduction

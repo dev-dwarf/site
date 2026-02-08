@@ -1,5 +1,5 @@
 title: Implementing A Simple Undo System
-date: Mon, 08 Jan 2024 1:00:00 MST
+date: Mon, 08 Jan 2024 01:00:00 MST
 desc: Details about a nice undo system I implemented recently.
 ---
 ##intro Introduction

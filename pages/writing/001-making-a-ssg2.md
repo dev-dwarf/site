@@ -1,5 +1,5 @@
 title: Upgrading A Static Site Generator
-date: Thu, 09 Jun 2023 1:00:00 MST
+date: Fri, 09 Jun 2023 01:00:00 MST
 desc: See how I've upgraded the SSG with the 'special' node.
 ---
 ##introd Introduction

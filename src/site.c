@@ -521,9 +521,9 @@ int main(int argc, char *argv[]) {
       append_str(&rss, title);
       append_strl(&rss, "</title>\n<description>");
       append_str(&rss, desc);
-      append_strl(&rss, "</description>\n<link>/writing/");
+      append_strl(&rss, "</description>\n<link>https://loganforman.com/writing/");
       append_str(&rss, name);
-      append_strl(&rss, ".html</link>\n<guid>/writing/");
+      append_strl(&rss, ".html</link>\n<guid>https://loganforman.com/writing/");
       append_str(&rss, name);
       append_strl(&rss, ".html</guid>\n<pubDate>");
       append_str(&rss, date);
