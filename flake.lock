@@ -5,11 +5,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1770575075,
-        "narHash": "sha256-iG5mA54OGCcefd7uII48ASZjGtzUPrYMMltnTJ7neRg=",
+        "lastModified": 1770617174,
+        "narHash": "sha256-AU3FQIIeQ3g9Q9U7DHrO+8FRBSsGNWFA6vDS2/wAZHE=",
         "owner": "dev-dwarf",
         "repo": "lf",
-        "rev": "c8e0c44bcc74c89719d6002a3c4468c69db41327",
+        "rev": "1ca66cbae2f1ff0315b3325a8ffff4a774ee08a3",
         "type": "github"
       },
       "original": {

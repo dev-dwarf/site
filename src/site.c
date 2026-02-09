@@ -228,7 +228,7 @@ void append(Buf *b, u8 *data, s32 len) {
 #define append_strl(b, sl) append(b, (u8*)sl, sizeof(sl"")-1)
 void append_str(Buf *b, str s) { append(b, s.str, s.len); }
 
-void render_inline(Buf *out, Text *t) {
+void append_html_inline(Buf *out, Text *t) {
   const str tags[TEXT_STYLES] = {
   [BOLD] = strl("<b>"), 
   [ITALIC] = strl("<em>"), 
@@ -267,7 +267,7 @@ void render_inline(Buf *out, Text *t) {
       }
 
       append_str(out, s);
-      render_inline(out, t->child);
+      append_html_inline(out, t->child);
 
       if (tag.len > 0) {
         append_strl(out, "</");
@@ -286,7 +286,7 @@ struct Wrap {
   str close_line;
 };
 #define WRAP(t, o, c, ol, cl) (Wrap){t, strl(o), strl(c), strl(ol), strl(cl)}
-void render_wrap(Buf *out, Block *b, Wrap w) {
+void append_wrap(Buf *out, Block *b, Wrap w) {
   w.close_line = w.close_line.len == 0? strl("\n") : w.close_line;
 
   if (b->type == w.type) {
@@ -296,7 +296,7 @@ void render_wrap(Buf *out, Block *b, Wrap w) {
       Text *tn = t->next; 
       t->next = 0;
       append_str(out, w.open_line);
-      render_inline(out, t);
+      append_html_inline(out, t);
       append_str(out, w.close_line);
       t = tn;
     }
@@ -306,17 +306,17 @@ void render_wrap(Buf *out, Block *b, Wrap w) {
 }
 
 str append_html(Buf *out, Block *b) {
-  render_wrap(out, b, WRAP(PARAGRAPH, "<p>\n", "</p>\n", "", ""));
-  render_wrap(out, b, WRAP(QUOTE, "<blockquote><p>\n", "</p></blockquote>\n", "", ""));
-  render_wrap(out, b, WRAP(ORD_LIST, "<ol>\n", "</ol>\n", "<li>", "</li>\n"));
-  render_wrap(out, b, WRAP(UN_LIST, "<ul>\n", "</ul>\n", "<li>", "</li>\n"));
-  render_wrap(out, b, WRAP(RULE, "<hr>\n", "", "", ""));
+  append_wrap(out, b, WRAP(PARAGRAPH, "<p>\n", "</p>\n", "", ""));
+  append_wrap(out, b, WRAP(QUOTE, "<blockquote><p>\n", "</p></blockquote>\n", "", ""));
+  append_wrap(out, b, WRAP(ORD_LIST, "<ol>\n", "</ol>\n", "<li>", "</li>\n"));
+  append_wrap(out, b, WRAP(UN_LIST, "<ul>\n", "</ul>\n", "<li>", "</li>\n"));
+  append_wrap(out, b, WRAP(RULE, "<hr>\n", "", "", ""));
 
   if (b->type == TABLE) {
     append_strl(out, "<table class='");
     append_str(out, b->id);
     append_strl(out, "'>\n");
-    render_wrap(out, b, WRAP(TABLE, "", "</table>\n", "<tr>", "</tr>\n"));
+    append_wrap(out, b, WRAP(TABLE, "", "</table>\n", "<tr>", "</tr>\n"));
   }
 
   if (b->type == HEADING) {
@@ -327,7 +327,7 @@ str append_html(Buf *out, Block *b) {
     append_str(out, b->id);
     append_strl(out, "'>");
 
-    render_inline(out, b->text);
+    append_html_inline(out, b->text);
 
     append_strl(out, "</h");
     append(out, &n, 1);
@@ -362,6 +362,8 @@ str append_html(Buf *out, Block *b) {
       u8 in_string = 0;
       str s = t->s;
       s32 i = 0;
+
+      bool no_comment = str_startl(b->id, "nc");
       while (s.len > 0) {
         while (i < s.len && (char_is_whitespace(s.str[i]) || char_is_alphanum(s.str[i]))) {
           i++;
@@ -369,11 +371,12 @@ str append_html(Buf *out, Block *b) {
         append(out, s.str, i);
         s = str_skip(s, i);
         i = 0;
-        if (str_startl(s, "//")) {
+        if (((!no_comment && str_startl(s, "//")) 
+        ||  ( no_comment && str_startl(s, "#"))) && in_comment == 0) {
           in_comment = 1;
           append_strl(out, COMMENT_SPAN);
-          i = 2;
-        } else if (str_startl(s, "/*")) {
+          i = no_comment? 1 : 2;
+        } else if (!no_comment && str_startl(s, "/*")) {
           in_comment = 2;
           append_strl(out, COMMENT_SPAN);
           i = 2;
@@ -459,7 +462,7 @@ bool write_file(const char *path, u8* data, s64 len) {
 int main(int argc, char *argv[]) {
   UNUSED(argc);
   UNUSED(argv);
-  Arena a = Arena_new((Arena){ .size = MB(32) });
+  Arena a = Arena_alloc((Arena){ .size = MB(32) });
 
   str header = read_file(&a, "src/header.html");
   str footer = read_file(&a, "src/footer.html");
@@ -468,11 +471,11 @@ int main(int argc, char *argv[]) {
 
   Buf out = {};
   out.cap = MB(2);
-  out.buf = Arena_take(&a, out.cap);
+  out.buf = Arena_bytes(&a, out.cap);
 
   Buf rss = {};
   rss.cap = MB(2);
-  rss.buf = Arena_take(&a, rss.cap);
+  rss.buf = Arena_bytes(&a, rss.cap);
   append_str(&rss, rss_header);
 
   ASSERT(chdir("pages/writing") == 0, "ERR: failed to chdir!");
@@ -546,7 +549,7 @@ int main(int argc, char *argv[]) {
           append_strl(&out, "<li><a href='#");
           append_str(&out, b->id);
           append_strl(&out, "'>");
-          render_inline(&out, b->text);
+          append_html_inline(&out, b->text);
           append_strl(&out, "</a></li>\n");
         }
       }
