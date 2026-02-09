@@ -6,7 +6,7 @@ enum TextStyle  {
   BOLD, ITALIC, STRUCK, CODE_INLINE,
   LINK, IMAGE, EXPLAIN,
   TABLE_CELL,
-  TEXT_STYLES,
+  TEXT_STYLES, SKIP
 };
 
 typedef struct Text Text;
@@ -141,7 +141,7 @@ str parse_inline(Arena *a, Text *p) {
     }
 
     enum TextStyle tok = NONE;
-    if (match_prefix(&s, "\\", &tok_len)) { s = str_skip(s, 1); } 
+    if (match_prefix(&s, "\\", &tok_len)) { tok = SKIP; } 
     else if (match_prefix(&s, "**", &tok_len)) { tok = BOLD; }
     else if (match_prefix(&s, "*", &tok_len))  { tok = ITALIC; }
     else if (match_prefix(&s, "~~", &tok_len)) { tok = STRUCK; }
@@ -154,6 +154,10 @@ str parse_inline(Arena *a, Text *p) {
 
     if (tok != NONE) {
       if (tok == stop) {
+        break;
+      } else if (p->type == SKIP) {
+        p->type = NONE;
+        tok_len = 0;
         break;
       } else {
         // Finish current 
@@ -245,9 +249,9 @@ void append_html_inline(Buf *out, Text *t) {
       append_str(out, s);
       append_strl(out, "</a>");
     } else if (t->type == EXPLAIN) {
-      append_strl(out, "<abbr title='");
+      append_strl(out, "<abbr title=\"");
       append_str(out, str_cut_char(&s, ','));
-      append_strl(out, "'>");
+      append_strl(out, "\">");
       append_str(out, s);
       append_strl(out, "</abbr>");
     } else if (t->type == IMAGE) {
