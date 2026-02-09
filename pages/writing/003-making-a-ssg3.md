@@ -167,7 +167,7 @@ online caches for my programs.
 
 I'm excited to use flakes for my projects with this system. A common problem I had before was that I would make changes to my base library while working on a project,
 and unintentionally break an older project. When I'd go back to run the older project, 
-maybe months later, it would be unclear why it did not build. With the way im using 
+maybe months later, it would be unclear why it did not build. With the way I'm using 
 flakes, each project will be locked to the specific version of my base library it was 
 built with until I explicitly update, which should ensure I always have a working build 
 of each project.
@@ -198,7 +198,8 @@ in my editor, and lets me avoid C's pretty weak multi-line string support.
 ---
 
 ##conc Conclusion
-Overall these changes have gotten the SSG down from 889 to 694 LOC, over ?(Yes I'm still counting the html and rss templates,20% smaller). 
+Overall these changes have gotten the SSG down from 889 to ~700 LOC, over 
+?(still counting the html and rss templates, 20% smaller). 
 If I later decide to move the buffered output into my base layer, that number would go 
 down a little bit more. It was fun to revisit this project; I've learned a lot since my 
 first attempt. I should be able to make my yearly posts now that I can do updates from 
