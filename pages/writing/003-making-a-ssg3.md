@@ -1,5 +1,5 @@
 title: Remaking My Static Site Generator
-date: Sun, 08 Feb 2026 21:00:00 MST
+date: Sun, 08 Feb 2026 23:25:00 MST
 desc: ~3 years on from my first post, I redid the SSG with new skills.
 ---
 
@@ -28,7 +28,7 @@ rjf's base layer. Since then, I've done more programming this way for fun and
 professionally, and I've seen more examples of similar projects, so I developed more opinions on what I prefer. My new library is @(https://github.com/dev-dwarf/lf lf), and has the following differences:
 
 ###sh Single Header
-Instead of a tree of `.c` and ``.h` files, for now I'm sticking to a 
+Instead of a tree of `.c` and `.h` files, for now I'm sticking to a 
 single header, `lf.h`. This encourages me to keep this core functionality lean
 and avoid bloating it with functions I actually only need for one project, 
 which was a common issue for me before.
@@ -59,7 +59,7 @@ void Arena_destroy(Arena *a); // NOTE(lf): Not needed at program exit
 ```
 
 ###str Strings
-I've changed the type of my `str` struct to `u8 *`, an unsigned byte. This is
+I've changed the `str` field of my `str` struct to `u8 \*`, an unsigned byte. This is
 inconvenient for inter-operating with traditional C functions, but makes the 
 str type much more useful for general non-text data, which is now a common use 
 case for me. I also define the `len` field with `sptr` instead of `s64` for the length,
@@ -73,34 +73,36 @@ typedef struct str {
 
 I have removed the many `str` functions I had but never used, and now have a more 
 minimal set which I have renamed for consistency. 
-I've also completely remove `StrList`s, which were previously used to build up
+I've also completely removed `StrList`, which was previously used to build up
 larger strings over multiple calls using linked lists. I still appreciate the 
 @(https://www.rfleury.com/p/in-defense-of-linked-lists power of linked lists), but 
 for strings specifically I have not found them that useful. For this project I used
 @(https://nullprogram.com/blog/2023/02/13/ buffered, formatted output), which 
-for now lives in my SSG code but may eventually be moved into my
-base layer.
+for now lives in my SSG code but may eventually be moved into my base layer.
 
 ---
 
-##yotld Year of the Linux Desktop
+##yotld Switching to Linux
 Microsoft seems dead set on destroying Windows with Windows 11, which I have been lucky enough to avoid using so far. For the last few years I have primarily been programming on Linux for work anyways, so I have much more experience with that 
 environment than in the past. The lack of high-quality debuggers is less of a problem 
 on Linux with @(https://github.com/al13n321/nnd nnd) and a forthcoming
 port of @(https://github.com/EpicGamesExt/raddebugger raddebugger). Overall Linux 
-seems to be a more viable platform for serious computing at this point.
+seems to be the much more viable OS of the two for serious work.
 
-Because of this, I've switched my main development machine to Linux and I am treating that as the primary target for my base layer and the SSG.
-Specifically I have switched to Nix-OS, and so I have also adopted Nix as a general
+Because of this, I've switched my main development machine to Linux and I am treating 
+that as the primary target for my base layer and the SSG.
+Specifically I have switched to NixOS, and so I have also adopted Nix as a general
 package management system and used it for my base layer and this project. I still 
 have mixed feelings about Nix; I would not consider myself an expert in the language
 or the finer details of the package manager, and I probably wouldn't have learned it 
-without needing to for work. But I can acknowledge that he data model is powerful and
+without needing to for work. But I can acknowledge that the data model is powerful and
 I have seen real benefits in the level of control and reproducability it offers.
+
 Surprisingly, NixOS had the smoothest install of any Linux distro I've tried, with 
 all the functionality on my machine working out of the box. I also appreciate that
 I can choose when to update without any annoying popups, and if something goes wrong,
-I can easily roll back to a working version of the OS.
+I can easily roll back to a working version of the OS. Installing packages is easy,
+and its obvious which packages I have installed since the full list is in code. 
 
 I have a flake for both my base layer and the SSG. The base layer flake defines an overlay with a convenience function to build a ?(Single Translation Unit,STU) project:
 ```nc-flake
@@ -156,17 +158,19 @@ style of programming. I appreciate Nixpkg's ability to package even the most con
 build processes into a simple command I can call, but for my own projects I'd rather
 have a simpler and faster build. Even if a project ends up needing more than one
 translation unit, I've found it better to be intentional about how I'm splitting things
-up than to just throw it all at something like make. `mkSTU` also adds a debug build
-for any package as simple as calling `nix build .#package.debug`, which is really nice.
+up than to just throw it all at something like Make. `mkSTU` also adds a debug build
+for any package via `nix build .#package.debug`, which is really nice.
 For some good reasons, and some less good ones, Nix usually removes all debug info, so 
-its nice to have debug builds built-in without having to remember how to get nix to 
-keep it each time. I also add `allowSubstitutes = false;` to avoid querying online
-caches for all little programs. 
+its nice to have debug builds built-in without having to remember how to get Nix to 
+keep it in there each time. I also add `allowSubstitutes = false;` to avoid querying 
+online caches for my programs. 
 
 I'm excited to use flakes for my projects with this system. A common problem I had before was that I would make changes to my base library while working on a project,
-and unintentionally break an older project. With the way im using flakes, each project
-will be locked to the specific version of my base library it was built with until
-I explicitly update, which should ensure I always have a working build of each project.
+and unintentionally break an older project. When I'd go back to run the older project, 
+maybe months later, it would be unclear why it did not build. With the way im using 
+flakes, each project will be locked to the specific version of my base library it was 
+built with until I explicitly update, which should ensure I always have a working build 
+of each project.
 
 ---
 
@@ -183,8 +187,8 @@ to avoid needing to build up any paths as strings. This isn't "scaleable", and d
 need to be; I have exactly two folders of `.md` files to deal with.
 
 The `@{SPECIAL}` block mechanism I made a @(https://loganforman.com/writing/making-a-ssg2.html whole post on) also does not seem needed. In practice I did
-not use it for much, so its just simpler to handle the special cases for giving posts
-a title and publish date and building a feed manually. While doing that I went ahead 
+not use it for much, so it is just simpler to handle the special cases of giving posts
+a title and publish date, and building a feed manually. While doing that I went ahead 
 and combined my post index page and rss feed by creating a `.xsl` file that styles my 
 rss feed to look exactly how the post index looked before.
 
@@ -194,7 +198,7 @@ in my editor, and lets me avoid C's pretty weak multi-line string support.
 ---
 
 ##conc Conclusion
-Overall these changes have gotten the SSG down from 889 to 694 LOC, over 20% smaller. 
+Overall these changes have gotten the SSG down from 889 to 694 LOC, over ?(Yes I'm still counting the html and rss templates,20% smaller). 
 If I later decide to move the buffered output into my base layer, that number would go 
 down a little bit more. It was fun to revisit this project; I've learned a lot since my 
 first attempt. I should be able to make my yearly posts now that I can do updates from 
