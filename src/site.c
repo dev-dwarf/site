@@ -559,6 +559,7 @@ int main(int argc, char *argv[]) {
       }
       for (; toc_level >= toc_first; toc_level--)
         append_strl(&out, "</ul>\n");
+      append_strl(&out, "<hr>\n");
 
       for (Block *b = first; b; b = b->next) {
         append_html(&out, b);

@@ -20,7 +20,7 @@
     </tr>
     <xsl:for-each select="/rss/channel/item">
       <tr>
-        <td><xsl:value-of select="substring(pubDate, 6, 11)" /></td>
+        <td><code><xsl:value-of select="substring(pubDate, 6, 11)" /></code></td>
         <td><a href="{link}"><xsl:value-of select="title" /></a></td>
         <td><xsl:value-of select="description" /></td>
       </tr>
