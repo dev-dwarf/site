@@ -489,6 +489,9 @@ int main(int argc, char *argv[]) {
     s32 articles = 0;
     for (struct dirent* f; (f = readdir(dir)); ) {
       if (f->d_type != DT_REG) continue;
+      str name = strc(f->d_name);
+      if (!str_endl(name, ".md")) continue;
+
       s32 i = 0;
       for (; i < articles; i++) {
         if (memcmp(article[i].str, f->d_name, 3) <= 0) {
@@ -498,7 +501,7 @@ int main(int argc, char *argv[]) {
       for (s32 j = articles; j > i; j--) {
         article[j] = article[j-1];
       }
-      article[i] = str_copy(&a, strc(f->d_name));
+      article[i] = str_copy(&a, name);
       articles++;
     }
     closedir(dir);
