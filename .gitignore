@@ -6,3 +6,4 @@ result/
 # dont want to commit the generated versions
 rss.xml
 rss-style.xsl
+result

@@ -23,12 +23,6 @@
   --dblue:    #192669;
 }
 
-
-::-moz-selection { /* Code for Firefox */
-  color: var(--black);
-  background:  var(--blue);
-}
-
 ::selection {
   color: var(--black);
   background:  var(--blue);
