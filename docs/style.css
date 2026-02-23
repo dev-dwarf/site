@@ -133,7 +133,7 @@ blockquote {
 }
 
 pre {
-  margin: 0.5rem 0em;
+  margin: 0rem 0em;
   padding: 0rem 0rem;
   white-space: preserve nowrap;
   font-family: 'Code', monospace;
@@ -336,7 +336,6 @@ summary > * {
   width: 100%;
   display: flex;
   flex-wrap: wrap;
-
 }
 
 body .light { display: none;}
@@ -382,6 +381,11 @@ body[data-theme="night"] .night { display: none; }
   .right {
     float:none;
     margin-bottom: 1rem;
+  }
+
+  .flex {
+    width: 100%;
+    display: block;
   }
 
   pre {

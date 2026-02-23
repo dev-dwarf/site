@@ -12,10 +12,10 @@ Part of the problem is that there are many competing terms for the different way
 Another issue is that many standards that are supposed to describe these types of encodings fail to fully specify the information you need to decode the values. For example, when working with CAN bus, a common file format is @(https://www.csselectronics.com/pages/can-dbc-file-database-intro .dbc files), that specify how to decode fixed point values from a CAN message with a specific 11 bit ID and up to 8 bytes of payload. DBCs specify "signals", fixed point encoded values within the payload bytes. For the purpose of this article, only 3 fields are relevant, highlighted below:
 ```
   SG_ EngineSpeed : 24|16@1+ (0.125,0) [0|8031.875] "rpm" Vector__XXX
-                    🭯  🭯  🭯 
-         start bit━━┛  ┃  ┃
-                       ┃  ┗━━━━endianness (@1 == Little-Endian)
-        bit length━━━━━┛
+                    │  │  │ 
+         start bit──┘  │  │
+                       │  └───endianness (@1 == Little-Endian)
+        bit length─────┘
 
 ```
 So DBCs specify the start bits, bit length, and endianness. But this is not enough to decode 
