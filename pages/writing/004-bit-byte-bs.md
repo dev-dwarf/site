@@ -428,7 +428,7 @@ in your codebase and hopefully never have to think about it again.
 
 ###hex Readable Hex Dumps
 The `(BE, MSB0)` approach has an advantage that the others don't, which is that 
-if you a hex dump of the encoded data, values that have been encoded will be
+if you do a hex dump of the encoded data, values that have been encoded will be
 visible in the same form as their associated numeric value:
 ```hex-dump
 read start=4, len=16:
