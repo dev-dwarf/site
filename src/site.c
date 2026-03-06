@@ -471,7 +471,6 @@ int main(int argc, char *argv[]) {
   str header = read_file(&a, "src/header.html");
   str footer = read_file(&a, "src/footer.html");
   str rss_header = read_file(&a, "src/rss-header.xml");
-  str rss_style = read_file(&a, "src/rss-style.xsl");
 
   Buf out = {};
   out.cap = MB(2);
@@ -481,6 +480,14 @@ int main(int argc, char *argv[]) {
   rss.cap = MB(2);
   rss.buf = Arena_bytes(&a, rss.cap);
   append_str(&rss, rss_header);
+
+  Buf blog = {};
+  blog.cap = MB(2);
+  blog.buf = Arena_bytes(&a, blog.cap);
+  append_str(&blog, header);
+  append_strl(&blog, "<p><div class='center'> <img src='/assets/dd.png' /></div></p>\n");
+  append_strl(&blog, "<h2 id='center'>Logan Forman <a href='https://www.twitter.com/dev_dwarf'>@dev dwarf</a></h2>");
+  append_strl(&blog, "<table><th>Date<th>Title<th style='width: 50%'>Description\n");
 
   ASSERT(chdir("pages/writing") == 0, "ERR: failed to chdir!");
   ARENA_TEMP(a) {
@@ -505,10 +512,9 @@ int main(int argc, char *argv[]) {
       articles++;
     }
     closedir(dir);
-
+    
     for (s32 i = 0; i < articles; i++) ARENA_TEMP(a) {
       out.len = 0;
-      append_strl(&out, "<!DOCTYPE html>\n");
       append_str(&out, header);
 
       str md = read_file(&a, str_cstring(&a, article[i]));
@@ -529,6 +535,16 @@ int main(int argc, char *argv[]) {
       append_strl(&rss, ".html</guid>\n<pubDate>");
       append_str(&rss, date);
       append_strl(&rss, "</pubDate>\n</item>\n");
+
+      append_strl(&blog, "<tr><td><code>");
+      append_str(&blog, str_first(str_skip(date, 6), 11));
+      append_strl(&blog, "</code></td>\n<td><a href='/writing/");
+      append_str(&blog, name);
+      append_strl(&blog, ".html'>");
+      append_str(&blog, title);
+      append_strl(&blog, "</a></td>\n<td>");
+      append_str(&blog, desc);
+      append_strl(&blog, "</td>\n</tr>\n");
 
       append_strl(&out, "<title> 0A ");
       append_str(&out, title);
@@ -581,13 +597,9 @@ int main(int argc, char *argv[]) {
 
   write_file("../../docs/rss.xml", rss.buf, rss.len);
 
-  rss.len = 0;
-  append_str(&rss, str_cut_char(&rss_style, '$'));
-  append_str(&rss, header);
-  append_str(&rss, str_cut_char(&rss_style, '$'));
-  append_str(&rss, footer);
-  append_str(&rss, rss_style);
-  write_file("../../docs/rss-style.xsl", rss.buf, rss.len);
+  append_strl(&blog, "</table>");
+  append_str(&blog, footer);
+  write_file("../../docs/blog.html", blog.buf, blog.len);
 
   ASSERT(chdir("..") == 0, "ERR: failed to chdir!");
   {
@@ -600,7 +612,6 @@ int main(int argc, char *argv[]) {
       str name = str_trim(strc(f->d_name), 3);
       Block *first = parse_md(&a, md);
 
-      append_strl(&out, "<!DOCTYPE html>\n");
       append_str(&out, header);
       append_strl(&out, "<title> 0A ");
       append_str(&out, name);
