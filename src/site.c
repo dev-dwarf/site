@@ -36,18 +36,18 @@ struct Block {
 
 Block* push_block(Arena *a, Block *b, enum BlockType type, str *line);
 Block* parse_md(Arena *a, str input) {
-  Block *first = Arena_struct_zero(a, Block);
+  Block *first = Arena_struct(a, Block);
   Block *b = first;
 
   s32 code_block = 0;
   while (input.len > 0) {
     str raw = str_cut_char(&input, '\n');
-    str line = str_skip_whitespace(raw);
+    str line = str_skip_ws(raw);
 
     if (str_startl(line, "```")) { // special case for code blocks
       if (b->type != CODE) {
         b = push_block(a, b, CODE, 0);
-        b->id = str_trim_whitespace(str_skip(line, 3));
+        b->id = str_trim_ws(str_skip(line, 3));
         b->num = code_block++;
       } else {
         b = push_block(a, b, 0, 0);
@@ -136,7 +136,7 @@ str parse_inline(Arena *a, Text *p) {
   }
 
   while (s.len > 0) {
-    while (s.len > 0 && (char_is_whitespace(s.str[0]) || char_is_alphanum(s.str[0]))) {
+    while (s.len > 0 && (char_is_ws(s.str[0]) || char_is_alphanum(s.str[0]))) {
       s = str_skip(s, 1);
     }
 
@@ -163,12 +163,12 @@ str parse_inline(Arena *a, Text *p) {
         // Finish current 
         p->s = str_first(p->s, (s.str - p->s.str) - tok_len);
 
-        p->child = Arena_struct_zero(a, Text); 
+        p->child = Arena_struct(a, Text); 
         p->child->type = tok;
         p->child->s = s;
         s = parse_inline(a, p->child);
 
-        p->child->next = Arena_struct_zero(a, Text);
+        p->child->next = Arena_struct(a, Text);
         p = p->child->next;
         p->type = NONE;
         p->s = s;
@@ -184,12 +184,12 @@ str parse_inline(Arena *a, Text *p) {
 
 Block* push_block(Arena *a, Block *b, enum BlockType type, str *line) {
   if (b->type != type && b->type) {
-    b = (b->next = Arena_struct_zero(a, Block));
+    b = (b->next = Arena_struct(a, Block));
   }
   b->type = type;
 
   if (line) {
-    Text *next = Arena_struct_zero(a, Text);
+    Text *next = Arena_struct(a, Text);
 
     Text *last = b->text;
     if (!last) {
@@ -369,7 +369,7 @@ str append_html(Buf *out, Block *b) {
 
       bool no_comment = str_startl(b->id, "nc");
       while (s.len > 0) {
-        while (i < s.len && (char_is_whitespace(s.str[i]) || char_is_alphanum(s.str[i]))) {
+        while (i < s.len && (char_is_ws(s.str[i]) || char_is_alphanum(s.str[i]))) {
           i++;
         }
         append(out, s.str, i);
