@@ -6,7 +6,7 @@
 }
 @font-face {
   font-family: 'Code';
-  src: url('/assets/BerkeleyMono.woff');
+  src: url('/assets/TX-02-Medium.woff2');
 }
 :root {
   --font-text: 'Text', sans-serif;
@@ -114,7 +114,7 @@ p {
 h1, h2, h3, h4, h5, h6 {
   width:100%;
   line-height: 2.0rem;
-  font-family: "Code", mono;
+  font-family: "Code", monospace;
   color: var(--text);
   text-decoration: underline 2px;
   text-underline-position: under;
