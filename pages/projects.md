@@ -6,6 +6,14 @@
 !|| !(/assets/icons/imp.png) || **IMP: Immediate Mode Plotting** 
 !|| || An immediate-mode api for data plotting and visualization. 
 
+!|projtable | <h2> 2026 </h2> || | 
+!|| !(/assets/icons/site.png) || **@(writing/making-a-ssg3.html Site)** 
+!|| || Used to make this website, re-done to validate lf.h library.
+!|| !(/assets/dd.png) || **@(https://github.com/dev-dwarf/lf lf.h)** 
+!|| || A standard libary my friends and I use for C/C++ projects. 
+!|| !(/assets/icons/fwss.png) || **@(https://dev-dwarf.itch.io/fwss FWSS)**
+!|| || Interactive critter terrarium. Made to learn @(https://love2d.org/ Love2D) in a couple weekends. 
+
 !|projtable | <h2> 2024 </h2> || | 
 !|| !(/assets/icons/babel.png) || **@(https://dev-dwarf.itch.io/babel Babel) (GMTK Gamejam 2024)** 
 !|| || Short puzzle game about guiding a blind man to his fall. 
@@ -20,9 +28,9 @@
 !|| !(/assets/icons/handmademath.png) || **@(https://github.com/HandmadeMath/HandmadeMath/pull/149 Handmade Math Contributions)** 
 !|| || Brought library to v2.0 milestone. Active maintainer since then. 
 !|| !(/assets/icons/site.png) || **@(/writing/making-a-ssg1.html Static Site Generator)** 
-!|| || Used to make this website, made to practice string handling in C using lcf. 
+!|| || Formerly used to make this website, made to practice string handling in C using lcf. 
 !|| !(/assets/dd.png) || **@(https://github.com/dev-dwarf/lcf LCF)** 
-!|| || My personal @(http://nothings.org/stb.h stb)/@(https://www.rfleury.com/ rjf) style standard libary for my C/C++ projects. 
+!|| || My archived personal @(http://nothings.org/stb.h stb)/@(https://www.rfleury.com/ rjf) style standard libary for my C/C++ projects. 
 !|| !(/assets/icons/saloon.png) || ** @(https://mmatt-ugh.itch.io/the-saloon The Saloon )(GMTK Gamejam)
 !|| || Small survivors-ish game made with usual friends. 
 
