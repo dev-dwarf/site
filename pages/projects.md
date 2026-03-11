@@ -1,18 +1,20 @@
 ###center Projects
 
 !|projtable | <h2> WIP </h2> || | 
-!|| !(/assets/dd.png) || **Custom Game Engine** 
-!|| || Working on a small engine to use for my games. Small preview in @(/writing/implementing-a-simple-undo-system.html this post.) 
 !|| !(/assets/icons/imp.png) || **IMP: Immediate Mode Plotting** 
 !|| || An immediate-mode api for data plotting and visualization. 
 
 !|projtable | <h2> 2026 </h2> || | 
-!|| !(/assets/icons/site.png) || **@(writing/making-a-ssg3.html Site)** 
-!|| || Used to make this website, re-done to validate lf.h library.
+!|| !(/assets/icons/site.png) || **@(https://github.com/dev-dwarf/site site)** 
+!|| || Used to make this website, re-done to @(writing/making-a-ssg3.html validate lf.h library and port to Linux).
 !|| !(/assets/dd.png) || **@(https://github.com/dev-dwarf/lf lf.h)** 
-!|| || A standard libary my friends and I use for C/C++ projects. 
+!|| || A standard libary my friends and I use for C/C++ projects. Very minimal, focusing on macros/typedefs, arena allocators, and length-based strings.
 !|| !(/assets/icons/fwss.png) || **@(https://dev-dwarf.itch.io/fwss FWSS)**
 !|| || Interactive critter terrarium. Made to learn @(https://love2d.org/ Love2D) in a couple weekends. 
+
+!|projtable | <h2> 2025 </h2> || |
+!|| !(/assets/dd.png) || **Custom Game Engine(s)** 
+!|| || Worked on some game engine prototypes to use for my games. Small preview in @(/writing/implementing-a-simple-undo-system.html this post.) DNF. Will revisit.
 
 !|projtable | <h2> 2024 </h2> || | 
 !|| !(/assets/icons/babel.png) || **@(https://dev-dwarf.itch.io/babel Babel) (GMTK Gamejam 2024)** 
